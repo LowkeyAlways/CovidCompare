@@ -1,73 +1,69 @@
-# React + TypeScript + Vite
+# CovidCompare
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Présentation du projet
 
-Currently, two official plugins are available:
+**CovidCompare** est une application web développée avec **React** permettant de comparer les statistiques liées au **COVID-19** entre deux pays (ou plus).  
+Le projet utilise une **API REST open-source** afin d’afficher des données réelles de manière claire et interactive.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Ce projet a été réalisé dans un cadre pédagogique.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Objectifs pédagogiques
 
-## Expanding the ESLint configuration
+- Apprendre à consommer une **API REST open-source**
+- Utiliser les **hooks React** (`useState`, `useEffect`)
+- Créer une **interface utilisateur interactive**
+- Comparer et analyser des données dynamiques
+- Visualiser des données avec des **graphiques**
+- Mettre en place des **filtres et sélections dynamiques**
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Fonctionnalités
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Sélection de **deux pays** via un menu déroulant
+- Affichage des statistiques pour chaque pays :
+  - Cas totaux
+  - Cas actifs
+  - Décès
+  - Vaccinations
+- Graphiques comparatifs pour visualiser les différences
+- Affichage de la **date de dernière mise à jour**
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Technologies utilisées
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Frontend
+- **React**
+  - Composants fonctionnels
+  - Hooks
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### API
+- **disease.sh** (API COVID-19 open-source)
+
+### UI & Visualisation
+- **Chart.js** via `react-chartjs-2`
+- **TailwindCSS / Sass / CSS** (au choix)
+- Librairies d’icônes (optionnel)
+
+### Description des composants
+
+- **CountrySelector**  
+  Menu déroulant pour sélectionner les pays
+
+- **CountryStats**  
+  Carte affichant les statistiques d’un pays
+
+- **ComparisonChart**  
+  Graphique comparatif entre les pays sélectionnés
+
+- **CovidAPI.js**  
+  Service chargé de récupérer les données depuis l’API `disease.sh`
+
+---
+
+## 👥 Équipe du projet
+
+Projet réalisé par **Andy**, **Abdulrahman** et **Lucas**
