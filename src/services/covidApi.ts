@@ -1,4 +1,5 @@
-import type { Country, CountryStats, HistoricalData, ApiResponse } from '../types/covid';
+import type { Country, CountryStats, HistoricalData, ApiResponse, CountryListItem } from '../types/covid';
+import { getCountryFlagEmoji } from '../utils/formatters';
 
 const BASE_URL = 'https://disease.sh/v3/covid-19';
 
@@ -44,6 +45,42 @@ export async function fetchCountries(): Promise<ApiResponse<Country[]>> {
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Erreur lors de la récupération des pays',
+    };
+  }
+}
+
+export async function fetchCountriesList(): Promise<ApiResponse<CountryListItem[]>> {
+  try {
+    const data = await getJSON<any[]>(`${BASE_URL}/countries`);
+    
+    const countries: CountryListItem[] = data
+      .map((country) => {
+        const iso2 = country.countryInfo?.iso2;
+        const iso3 = country.countryInfo?.iso3;
+        const code = iso2 || iso3 || country.country;
+        
+        // Créer l'URL du drapeau via GitHub (flag-icons - très stable et clean)
+        const flag = iso2 ? `https://raw.githubusercontent.com/lipis/flag-icons/main/flags/4x3/${iso2.toLowerCase()}.svg` : undefined;
+        
+        return {
+          name: country.country,
+          code,
+          flag,
+        };
+      })
+      .filter((country) => country.name && country.code)
+      .sort((a, b) => a.name.localeCompare(b.name));
+    
+    console.log('🌍 Pays chargés:', countries.slice(0, 5));
+    
+    return {
+      success: true,
+      data: countries,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Erreur lors de la récupération de la liste des pays',
     };
   }
 }
@@ -123,3 +160,4 @@ export async function fetchAllHistoricalData(days: number = 30): Promise<ApiResp
     };
   }
 }
+
