@@ -1,105 +1,22 @@
 import './App.css'
 import './styles/index.css'
 import "./config/chart";
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { CountrySelector } from './components/CountrySelector';
 import { CountryStats } from './components/CountryStats';
 import { TrendChart } from './components/TrendChart';
 import { ComparisonChart } from './components/ComparisonChart';
-import { fetchCountryStats, fetchHistoricalData } from './services/covidApi';
-import type { CountryListItem, CountrySnapshot } from './types/covid';
-import type { CountryHistoricalData } from './utils/constants';
-
-type MetricKey = 'cases' | 'active' | 'deaths' | 'vaccinations';
+import { ChartSkeleton, CountryStatsSkeleton } from './components/SkeletonLoaders';
+import { useCovidData } from './hooks/useCovidData';
+import type { CountryListItem } from './types/covid';
 
 function App() {
   const [selectedCountries, setSelectedCountries] = useState<CountryListItem[]>([]);
-  const [snapshots, setSnapshots] = useState<CountrySnapshot[]>([]);
-  const [trendData, setTrendData] = useState<CountryHistoricalData[]>([]);
-  const [isLoadingStats, setIsLoadingStats] = useState(false);
-  const [statsError, setStatsError] = useState<string | null>(null);
-  const [selectedMetric, setSelectedMetric] = useState<MetricKey>('cases');
+  const { snapshots, trendData, isLoading, error, selectedMetric, setSelectedMetric } = useCovidData(selectedCountries);
 
   const handleCountrySelection = (countries: CountryListItem[]) => {
     setSelectedCountries(countries);
   };
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const loadStats = async () => {
-      if (selectedCountries.length === 0) {
-        setSnapshots([]);
-        setTrendData([]);
-        setStatsError(null);
-        return;
-      }
-
-      setIsLoadingStats(true);
-      setStatsError(null);
-
-      try {
-        const statsResponses = await Promise.all(
-          selectedCountries.map((country) => fetchCountryStats(country.code))
-        );
-
-        const historicalResponses = await Promise.all(
-          selectedCountries.map((country) => fetchHistoricalData(country.code, 1500))
-        );
-
-        if (cancelled) return;
-
-        const errors = statsResponses.filter((res) => !res.success);
-        if (errors.length > 0) {
-          setStatsError(errors[0].error || 'Erreur lors du chargement des statistiques');
-        }
-
-        const data = statsResponses
-          .filter((res): res is { success: true; data: CountrySnapshot } => res.success === true && !!res.data)
-          .map((res) => res.data);
-
-        setSnapshots(data);
-
-        const trendDataArray = historicalResponses
-          .filter((res): res is { success: true; data: any } => res.success === true && !!res.data)
-          .map((res, idx) => {
-            const country = selectedCountries[idx];
-            
-            // Générer l'historique pour toutes les métriques
-            const casesDates = Object.keys(res.data.timeline.cases);
-            const histData = casesDates.map((date) => ({
-              date: new Date(date).toISOString().split('T')[0],
-              cases: (res.data.timeline.cases[date] || 0) as number,
-              deaths: (res.data.timeline.deaths[date] || 0) as number,
-              recovered: (res.data.timeline.recovered?.[date] || 0) as number,
-              // Pour 'active', on calcule: cases - deaths - recovered
-            }));
-
-            return {
-              name: country.name,
-              data: histData,
-            };
-          });
-
-        setTrendData(trendDataArray);
-      } catch (error) {
-        if (!cancelled) {
-          const message = error instanceof Error ? error.message : 'Erreur inconnue';
-          setStatsError(message);
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoadingStats(false);
-        }
-      }
-    };
-
-    loadStats();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedCountries]);
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -119,24 +36,30 @@ function App() {
                 <h2 className="text-2xl font-bold text-gray-800 mb-6">
                   Comparaison multi-pays
                 </h2>
-                <div className="h-96 w-full">
-                  <ComparisonChart 
-                    countries={snapshots}
-                    selectedMetric={selectedMetric}
-                    onMetricChange={setSelectedMetric}
-                  />
-                </div>
+                {isLoading ? (
+                  <ChartSkeleton />
+                ) : (
+                  <div className="h-96 w-full">
+                    <ComparisonChart 
+                      countries={snapshots}
+                      selectedMetric={selectedMetric}
+                      onMetricChange={setSelectedMetric}
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="bg-white rounded-lg shadow-xl p-8">
                 <h2 className="text-2xl font-bold text-gray-800 mb-6">
                   Évolution 2019 - 2023
                 </h2>
-                {trendData.length > 0 && (
+                {isLoading ? (
+                  <ChartSkeleton />
+                ) : trendData.length > 0 ? (
                   <div className="h-[620px] w-full">
                     <TrendChart series={trendData} selectedMetric={selectedMetric} />
                   </div>
-                )}
+                ) : null}
               </div>
             </div>
 
@@ -149,23 +72,30 @@ function App() {
                 <p className="text-sm text-gray-600">
                   {selectedCountries.map((c) => c.name).join(', ')}
                 </p>
-                {isLoadingStats && (
+                {isLoading && (
                   <span className="text-sm text-blue-600 flex items-center gap-2">
                     <span className="animate-spin">⏳</span> Chargement...
                   </span>
                 )}
               </div>
 
-              {statsError && (
+              {error && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                  <p className="text-sm text-red-700">{statsError}</p>
+                  <p className="text-sm text-red-700">{error}</p>
                 </div>
               )}
 
               <div className="space-y-6">
-                {snapshots.map((snapshot) => (
-                  <CountryStats key={snapshot.code} country={snapshot} />
-                ))}
+                {isLoading ? (
+                  <>
+                    <CountryStatsSkeleton />
+                    <CountryStatsSkeleton />
+                  </>
+                ) : (
+                  snapshots.map((snapshot) => (
+                    <CountryStats key={snapshot.code} country={snapshot} />
+                  ))
+                )}
               </div>
             </div>
           </>
