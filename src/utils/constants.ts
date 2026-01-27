@@ -39,9 +39,9 @@ export type MetricType = 'cases' | 'active' | 'deaths' | 'vaccinations';
 
 // Labels lisibles pour chaque métrique
 export const METRIC_LABELS: Record<MetricType, string> = {
-  cases: 'Total Cases',
-  active: 'Active Cases',
-  deaths: 'Deaths',
+  cases: 'Total de Cas',
+  active: 'Cas Actifs',
+  deaths: 'Décès',
   vaccinations: 'Vaccinations',
 };
 
@@ -59,7 +59,9 @@ export interface CountryStats {
 // Interface pour les données historiques (séries temporelles)
 export interface HistoricalDataPoint {
   date: string; // Format ISO "YYYY-MM-DD"
-  value: number;
+  cases: number;
+  deaths: number;
+  recovered: number;
 }
 
 export interface CountryHistoricalData {

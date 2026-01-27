@@ -1,4 +1,4 @@
-import type { Country, CountryStats, HistoricalData, ApiResponse, CountryListItem, CountrySnapshot } from '../types/covid';
+import type { Country, HistoricalData, ApiResponse, CountryListItem, CountrySnapshot } from '../types/covid';
 
 const BASE_URL = 'https://disease.sh/v3/covid-19';
 
