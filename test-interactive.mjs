@@ -1,6 +1,3 @@
-// Test interactif de l'API COVID
-// Exécute avec: node test-interactive.mjs
-
 import * as readline from 'readline';
 import * as covidApi from './src/services/covidApi.ts';
 

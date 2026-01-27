@@ -1,5 +1,3 @@
-// Types pour l'API COVID-19
-
 export interface Country {
   name: string;
   code: string;

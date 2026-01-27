@@ -2,12 +2,6 @@ import type { Country, CountryStats, HistoricalData, ApiResponse } from '../type
 
 const BASE_URL = 'https://disease.sh/v3/covid-19';
 
-/**
- * Helper générique pour faire des appels GET et parser le JSON
- * @param url - URL complète à appeler
- * @returns Promise avec les données parsées
- * @throws Error si la requête échoue
- */
 async function getJSON<T>(url: string): Promise<T> {
   try {
     const response = await fetch(url);
@@ -28,10 +22,6 @@ async function getJSON<T>(url: string): Promise<T> {
   }
 }
 
-/**
- * Récupère la liste de tous les pays disponibles
- * @returns ApiResponse avec la liste des pays
- */
 export async function fetchCountries(): Promise<ApiResponse<Country[]>> {
   try {
     const data = await getJSON<any[]>(`${BASE_URL}/countries`);
@@ -43,8 +33,8 @@ export async function fetchCountries(): Promise<ApiResponse<Country[]>> {
         iso2: country.countryInfo.iso2,
         iso3: country.countryInfo.iso3,
       }))
-      .filter((country) => country.code) // Filtrer les pays sans code
-      .sort((a, b) => a.name.localeCompare(b.name)); // Trier par nom
+      .filter((country) => country.code)
+      .sort((a, b) => a.name.localeCompare(b.name));
     
     return {
       success: true,
@@ -58,11 +48,6 @@ export async function fetchCountries(): Promise<ApiResponse<Country[]>> {
   }
 }
 
-/**
- * Récupère les statistiques complètes pour un pays spécifique
- * @param countryCode - Code ISO2 ou ISO3 du pays (ex: 'FR', 'USA')
- * @returns ApiResponse avec les statistiques du pays
- */
 export async function fetchCountryStats(countryCode: string): Promise<ApiResponse<CountryStats>> {
   if (!countryCode || countryCode.trim() === '') {
     return {
@@ -88,12 +73,6 @@ export async function fetchCountryStats(countryCode: string): Promise<ApiRespons
   }
 }
 
-/**
- * Récupère les données historiques pour un pays sur les X derniers jours
- * @param countryCode - Code ISO2 ou ISO3 du pays
- * @param days - Nombre de jours (par défaut 30)
- * @returns ApiResponse avec les données historiques
- */
 export async function fetchHistoricalData(
   countryCode: string,
   days: number = 30
@@ -129,11 +108,6 @@ export async function fetchHistoricalData(
   }
 }
 
-/**
- * Récupère toutes les données historiques pour tous les pays (utilisé pour comparaison globale)
- * @param days - Nombre de jours (par défaut 30)
- * @returns ApiResponse avec les données historiques globales
- */
 export async function fetchAllHistoricalData(days: number = 30): Promise<ApiResponse<any>> {
   try {
     const data = await getJSON<any>(`${BASE_URL}/historical/all?lastdays=${days}`);

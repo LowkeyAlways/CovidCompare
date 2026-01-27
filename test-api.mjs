@@ -1,11 +1,8 @@
-// Script de test pour l'API COVID
-// Exécute avec: node test-api.mjs
 
 import * as covidApi from './src/services/covidApi.ts';
 
 console.log('🧪 Démarrage des tests API...\n');
 
-// Test 1: Récupérer les pays
 console.log('📍 Test 1: Récupérer la liste des pays');
 const countries = await covidApi.fetchCountries();
 if (countries.success) {
@@ -15,7 +12,6 @@ if (countries.success) {
   console.log(`❌ Erreur: ${countries.error}\n`);
 }
 
-// Test 2: Récupérer les stats de la France
 console.log('🇫🇷 Test 2: Récupérer les stats de la France');
 const france = await covidApi.fetchCountryStats('france');
 if (france.success) {
@@ -26,7 +22,6 @@ if (france.success) {
   console.log(`❌ Erreur: ${france.error}\n`);
 }
 
-// Test 3: Récupérer les stats des USA
 console.log('🇺🇸 Test 3: Récupérer les stats des USA');
 const usa = await covidApi.fetchCountryStats('usa');
 if (usa.success) {
@@ -37,7 +32,6 @@ if (usa.success) {
   console.log(`❌ Erreur: ${usa.error}\n`);
 }
 
-// Test 4: Récupérer les données historiques (30 jours)
 console.log('📊 Test 4: Récupérer les données historiques (30 jours)');
 const historical = await covidApi.fetchHistoricalData('france', 30);
 if (historical.success) {

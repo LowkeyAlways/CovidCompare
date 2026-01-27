@@ -1,6 +1,3 @@
-// Script de test pour l'API COVID
-// Lance avec: node --loader ts-node/esm test.ts
-
 import { fetchCountries, fetchCountryStats, fetchHistoricalData } from './src/services/covidApi.js';
 
 async function runTests() {
