@@ -5,6 +5,12 @@ export interface Country {
   iso3?: string;
 }
 
+export interface CountryListItem {
+  name: string;
+  code: string;
+  flag?: string;
+}
+
 export interface CountryInfo {
   _id?: number;
   iso2: string;

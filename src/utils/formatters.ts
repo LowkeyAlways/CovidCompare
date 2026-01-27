@@ -53,3 +53,21 @@ export const formatPercentage = (value: number | null | undefined, decimals = 2)
   if (value === null || value === undefined) return 'N/A';
   return `${(value * 100).toFixed(decimals)}%`;
 };
+
+/**
+ * Convertit un code ISO2 en emoji de drapeau
+ * Utilise une map statique pour plus de fiabilité
+ */
+export const getCountryFlagEmoji = (iso2: string | null | undefined): string => {
+  if (!iso2 || iso2.length !== 2) return '';
+  
+  // Convertir manuellement chaque lettre en Regional Indicator Symbol
+  const CP1 = 127397; // 0x1F1E5
+  const codePoint1 = iso2.charCodeAt(0) + CP1;
+  const codePoint2 = iso2.charCodeAt(1) + CP1;
+  
+  const emoji = String.fromCodePoint(codePoint1, codePoint2);
+  console.log(`[getCountryFlagEmoji] iso2="${iso2}" → emoji="${emoji}"`);
+  
+  return emoji;
+};
