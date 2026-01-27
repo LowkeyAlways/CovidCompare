@@ -46,6 +46,26 @@ export interface CountryStats {
   criticalPerOneMillion: number;
 }
 
+// Normalised instant-T snapshot for a country
+export interface CountrySnapshot {
+  country: string;
+  code: string;
+  flag?: string;
+  continent?: string;
+  updated: number; // timestamp in ms
+  cases: number;
+  todayCases?: number;
+  deaths: number;
+  todayDeaths?: number;
+  active: number;
+  recovered?: number;
+  todayRecovered?: number;
+  critical?: number;
+  tests?: number;
+  vaccinations?: number;
+  population?: number;
+}
+
 export interface TimelineData {
   [date: string]: number;
 }

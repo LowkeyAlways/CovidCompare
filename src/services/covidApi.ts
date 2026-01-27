@@ -1,5 +1,4 @@
-import type { Country, CountryStats, HistoricalData, ApiResponse, CountryListItem } from '../types/covid';
-import { getCountryFlagEmoji } from '../utils/formatters';
+import type { Country, CountryStats, HistoricalData, ApiResponse, CountryListItem, CountrySnapshot } from '../types/covid';
 
 const BASE_URL = 'https://disease.sh/v3/covid-19';
 
@@ -85,7 +84,7 @@ export async function fetchCountriesList(): Promise<ApiResponse<CountryListItem[
   }
 }
 
-export async function fetchCountryStats(countryCode: string): Promise<ApiResponse<CountryStats>> {
+export async function fetchCountryStats(countryCode: string): Promise<ApiResponse<CountrySnapshot>> {
   if (!countryCode || countryCode.trim() === '') {
     return {
       success: false,
@@ -94,13 +93,53 @@ export async function fetchCountryStats(countryCode: string): Promise<ApiRespons
   }
 
   try {
-    const data = await getJSON<CountryStats>(
+    const statsPromise = getJSON<any>(
       `${BASE_URL}/countries/${encodeURIComponent(countryCode)}`
     );
-    
+
+    // Vaccination coverage (fullData=true to get the latest total field)
+    const vaccinePromise = getJSON<any>(
+      `${BASE_URL}/vaccine/coverage/countries/${encodeURIComponent(countryCode)}?lastdays=1&fullData=true`
+    ).catch(() => null); // Ne bloque pas si l'endpoint vaccination échoue
+
+    const [data, vaccineData] = await Promise.all([statsPromise, vaccinePromise]);
+
+    let vaccinations: number | undefined;
+    if (Array.isArray(vaccineData) && vaccineData.length > 0) {
+      const latest = vaccineData[vaccineData.length - 1];
+      vaccinations = latest?.total ?? latest?.totalVaccinations ?? undefined;
+    } else if (Array.isArray(vaccineData?.timeline)) {
+      // fullData renvoie parfois { timeline: [{ total, date, ... }] }
+      const latest = vaccineData.timeline[vaccineData.timeline.length - 1];
+      vaccinations = latest?.total ?? latest?.totalVaccinations ?? undefined;
+    } else if (vaccineData?.timeline && typeof vaccineData.timeline === 'object') {
+      // Fallback si on reçoit un objet {"1/1/21": 123, ...}
+      const timelineValues = Object.values(vaccineData.timeline) as number[];
+      vaccinations = timelineValues.length > 0 ? timelineValues[timelineValues.length - 1] : undefined;
+    }
+
+    const snapshot: CountrySnapshot = {
+      country: data.country,
+      code: data.countryInfo?.iso2 || data.countryInfo?.iso3 || data.country,
+      flag: data.countryInfo?.flag,
+      continent: data.continent,
+      updated: Number(data.updated) || Date.now(),
+      cases: data.cases ?? 0,
+      todayCases: data.todayCases,
+      deaths: data.deaths ?? 0,
+      todayDeaths: data.todayDeaths,
+      active: data.active ?? 0,
+      recovered: data.recovered,
+      todayRecovered: data.todayRecovered,
+      critical: data.critical,
+      tests: data.tests,
+      vaccinations,
+      population: data.population,
+    };
+
     return {
       success: true,
-      data,
+      data: snapshot,
     };
   } catch (error) {
     return {
