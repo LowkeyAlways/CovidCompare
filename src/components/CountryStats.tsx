@@ -1,4 +1,4 @@
-import type { CountryStats as CountryStatsType } from '../utils/constants';
+import type { CountrySnapshot } from '../types/covid';
 import { formatNumber } from '../utils/formatters';
 
 interface StatCardProps {
@@ -17,7 +17,7 @@ const StatCard = ({ label, value, color }: StatCardProps) => (
 );
 
 interface CountryStatsProps {
-  country: CountryStatsType;
+  country: CountrySnapshot;
   layout?: 'grid' | 'row';
 }
 
@@ -26,31 +26,34 @@ export const CountryStats = ({ country, layout = 'grid' }: CountryStatsProps) =>
     ? 'grid grid-cols-2 md:grid-cols-4 gap-4' 
     : 'flex flex-wrap gap-4';
 
+  const metrics = [
+    { label: 'Cas totaux', value: country.cases, color: 'border-blue-500' },
+    { label: 'Cas actifs', value: country.active, color: 'border-orange-500' },
+    { label: 'Décès', value: country.deaths, color: 'border-red-500' },
+    { label: 'Vaccination', value: country.vaccinations, color: 'border-green-500' },
+  ].filter((m) => m.value !== undefined);
+
   return (
     <div className="w-full">
-      <h3 className="text-xl font-bold text-gray-800 mb-4">{country.name}</h3>
-      
+      <div className="flex items-center gap-3 mb-4">
+        {country.flag && (
+          <img src={country.flag} alt={country.country} className="w-8 h-6 object-cover rounded" />
+        )}
+        <div>
+          <h3 className="text-xl font-bold text-gray-800">{country.country}</h3>
+          {country.continent && <p className="text-sm text-gray-500">{country.continent}</p>}
+        </div>
+      </div>
+
       <div className={containerClass}>
-        <StatCard 
-          label="Total Cases" 
-          value={country.cases} 
-          color="border-blue-500" 
-        />
-        <StatCard 
-          label="Active" 
-          value={country.active} 
-          color="border-orange-500" 
-        />
-        <StatCard 
-          label="Deaths" 
-          value={country.deaths} 
-          color="border-red-500" 
-        />
-        <StatCard 
-          label="Vaccinations" 
-          value={country.vaccinations} 
-          color="border-green-500" 
-        />
+        {metrics.map((metric) => (
+          <StatCard
+            key={metric.label}
+            label={metric.label}
+            value={metric.value}
+            color={metric.color}
+          />
+        ))}
       </div>
     </div>
   );
