@@ -12,6 +12,7 @@ interface UseCovidDataReturn {
   error: string | null;
   selectedMetric: MetricKey;
   setSelectedMetric: (metric: MetricKey) => void;
+  retry: () => void;
 }
 
 export const useCovidData = (selectedCountries: CountryListItem[]): UseCovidDataReturn => {
@@ -20,6 +21,7 @@ export const useCovidData = (selectedCountries: CountryListItem[]): UseCovidData
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedMetric, setSelectedMetric] = useState<MetricKey>('cases');
+  const [retryTrigger, setRetryTrigger] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -96,7 +98,11 @@ export const useCovidData = (selectedCountries: CountryListItem[]): UseCovidData
     return () => {
       cancelled = true;
     };
-  }, [selectedCountries]);
+  }, [selectedCountries, retryTrigger]);
+
+  const retry = () => {
+    setRetryTrigger((prev) => prev + 1);
+  };
 
   return {
     snapshots,
@@ -105,5 +111,6 @@ export const useCovidData = (selectedCountries: CountryListItem[]): UseCovidData
     error,
     selectedMetric,
     setSelectedMetric,
+    retry,
   };
 };

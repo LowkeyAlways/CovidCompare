@@ -11,6 +11,7 @@ export const CountrySelector = ({ onSelectionChange }: CountrySelectorProps) => 
   const { countries, isLoading, error } = useCountriesList();
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
 
   const handleToggleCountry = (countryCode: string) => {
@@ -35,6 +36,12 @@ export const CountrySelector = ({ onSelectionChange }: CountrySelectorProps) => 
     onSelectionChange([]);
   };
 
+  // Filtrer les pays en fonction de la recherche
+  const filteredCountries = countries.filter((country) =>
+    country.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    country.code.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="w-full max-w-md">
       {isLoading && <p className="text-gray-400 text-sm">Chargement des pays...</p>}
@@ -57,31 +64,42 @@ export const CountrySelector = ({ onSelectionChange }: CountrySelectorProps) => 
             </button>
 
             {isOpen && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-blue-300 rounded-lg shadow-xl z-10 max-h-72 overflow-y-auto">
-                {countries.length === 0 ? (
-                  <p className="px-4 py-3 text-gray-500 text-center">Aucun pays disponible</p>
-                ) : (
-                  countries.map((country) => (
-                    <label
-                      key={country.code}
-                      className="flex items-center px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedCountries.includes(country.code)}
-                        onChange={() => handleToggleCountry(country.code)}
-                        className="w-4 h-4 text-blue-600 rounded cursor-pointer"
-                      />
-                      <span className="ml-3 text-gray-700 flex items-center gap-3 flex-1">
-                        {country.flag && (
-                          <img src={country.flag} alt={country.name} className="w-5 h-3 object-cover rounded" />
-                        )}
-                        <span className="font-medium">{country.name}</span>
-                        <span className="text-xs text-gray-400 ml-auto">({country.code})</span>
-                      </span>
-                    </label>
-                  ))
-                )}
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-blue-300 rounded-lg shadow-xl z-10 max-h-72 overflow-hidden flex flex-col">
+                <input
+                  type="text"
+                  placeholder="🔍 Rechercher un pays..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="px-4 py-2 border-b border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-300 bg-gray-50"
+                />
+                <div className="overflow-y-auto max-h-64">
+                  {filteredCountries.length === 0 ? (
+                    <p className="px-4 py-3 text-gray-500 text-center text-sm">
+                      {searchQuery ? 'Aucun pays trouvé' : 'Aucun pays disponible'}
+                    </p>
+                  ) : (
+                    filteredCountries.map((country) => (
+                      <label
+                        key={country.code}
+                        className="flex items-center px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedCountries.includes(country.code)}
+                          onChange={() => handleToggleCountry(country.code)}
+                          className="w-4 h-4 text-blue-600 rounded cursor-pointer"
+                        />
+                        <span className="ml-3 text-gray-700 flex items-center gap-3 flex-1">
+                          {country.flag && (
+                            <img src={country.flag} alt={country.name} className="w-5 h-3 object-cover rounded" />
+                          )}
+                          <span className="font-medium">{country.name}</span>
+                          <span className="text-xs text-gray-400 ml-auto">({country.code})</span>
+                        </span>
+                      </label>
+                    ))
+                  )}
+                </div>
               </div>
             )}
           </div>

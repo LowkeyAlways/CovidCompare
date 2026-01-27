@@ -7,18 +7,40 @@ async function getJSON<T>(url: string): Promise<T> {
     const response = await fetch(url);
     
     if (!response.ok) {
-      throw new Error(
-        `Erreur HTTP ${response.status}: ${response.statusText}`
-      );
+      let errorMsg = `Erreur HTTP ${response.status}`;
+      
+      // Essayer de lire le body JSON pour un message plus détaillé
+      try {
+        const errorBody = await response.json();
+        if (errorBody?.message) {
+          errorMsg = errorBody.message;
+        } else if (errorBody?.error) {
+          errorMsg = errorBody.error;
+        }
+      } catch {
+        // Si le body n'est pas JSON, utiliser le statusText
+        errorMsg += `: ${response.statusText}`;
+      }
+      
+      // Messages personnalisés par code HTTP
+      if (response.status === 404) {
+        throw new Error(`Pays ou ressource introuvable (404)`);
+      } else if (response.status === 429) {
+        throw new Error(`Trop de requêtes - veuillez réessayer dans quelques secondes (429)`);
+      } else if (response.status >= 500) {
+        throw new Error(`API indisponible - Erreur serveur (${response.status})`);
+      }
+      
+      throw new Error(errorMsg);
     }
     
     const data = await response.json();
     return data;
   } catch (error) {
     if (error instanceof Error) {
-      throw new Error(`Échec de la requête API: ${error.message}`);
+      throw new Error(error.message);
     }
-    throw new Error('Une erreur inconnue est survenue');
+    throw new Error('Erreur réseau ou inconnue');
   }
 }
 

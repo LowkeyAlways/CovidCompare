@@ -12,7 +12,7 @@ import type { CountryListItem } from './types/covid';
 
 function App() {
   const [selectedCountries, setSelectedCountries] = useState<CountryListItem[]>([]);
-  const { snapshots, trendData, isLoading, error, selectedMetric, setSelectedMetric } = useCovidData(selectedCountries);
+  const { snapshots, trendData, isLoading, error, selectedMetric, setSelectedMetric, retry } = useCovidData(selectedCountries);
 
   const handleCountrySelection = (countries: CountryListItem[]) => {
     setSelectedCountries(countries);
@@ -81,7 +81,18 @@ function App() {
 
               {error && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                  <p className="text-sm text-red-700">{error}</p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-red-700 mb-1">⚠️ Erreur lors du chargement</p>
+                      <p className="text-sm text-red-600">{error}</p>
+                    </div>
+                    <button
+                      onClick={retry}
+                      className="ml-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors flex-shrink-0"
+                    >
+                      🔄 Réessayer
+                    </button>
+                  </div>
                 </div>
               )}
 
