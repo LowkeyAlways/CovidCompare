@@ -11,7 +11,7 @@ export const CountrySelector = ({ onSelectionChange }: CountrySelectorProps) => 
   const { countries, isLoading, error } = useCountriesList();
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [feedback, setFeedback] = useState<{ type: 'success' | 'warning' | 'error'; message: string } | null>(null);
+
 
   const handleToggleCountry = (countryCode: string) => {
     if (selectedCountries.includes(countryCode)) {
@@ -19,31 +19,20 @@ export const CountrySelector = ({ onSelectionChange }: CountrySelectorProps) => 
       setSelectedCountries(updated);
       const selectedData = countries.filter((c) => updated.includes(c.code));
       onSelectionChange(selectedData);
-      setFeedback({ type: 'success', message: '✓ Pays supprimé' });
-      setTimeout(() => setFeedback(null), 2000);
     } else {
       if (selectedCountries.length >= MAX_COUNTRIES_COMPARISON) {
-        setFeedback({
-          type: 'error',
-          message: `⚠️ Maximum ${MAX_COUNTRIES_COMPARISON} pays autorisés. Supprimez un pays avant d'en ajouter un autre.`,
-        });
-        setTimeout(() => setFeedback(null), 4000);
         return;
       }
       const updated = [...selectedCountries, countryCode];
       setSelectedCountries(updated);
       const selectedData = countries.filter((c) => updated.includes(c.code));
       onSelectionChange(selectedData);
-      setFeedback({ type: 'success', message: '✓ Pays ajouté' });
-      setTimeout(() => setFeedback(null), 2000);
     }
   };
 
   const handleClear = () => {
     setSelectedCountries([]);
     onSelectionChange([]);
-    setFeedback({ type: 'success', message: '✓ Sélection effacée' });
-    setTimeout(() => setFeedback(null), 2000);
   };
 
   return (
@@ -61,8 +50,8 @@ export const CountrySelector = ({ onSelectionChange }: CountrySelectorProps) => 
               <span className="flex items-center gap-2">
                 🌍
                 {selectedCountries.length === 0
-                  ? 'Select countries...'
-                  : `${selectedCountries.length} selected`}
+                  ? 'Sélectionnez des pays...'
+                  : `${selectedCountries.length} sélectionnés`}
               </span>
               <span className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>▼</span>
             </button>
