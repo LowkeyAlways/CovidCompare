@@ -44,7 +44,7 @@ function App() {
         );
 
         const historicalResponses = await Promise.all(
-          selectedCountries.map((country) => fetchHistoricalData(country.code, 30))
+          selectedCountries.map((country) => fetchHistoricalData(country.code, 1500))
         );
 
         if (cancelled) return;
@@ -130,7 +130,7 @@ function App() {
 
               <div className="bg-white rounded-lg shadow-xl p-8">
                 <h2 className="text-2xl font-bold text-gray-800 mb-6">
-                  Évolution sur 30 jours
+                  Évolution 2019 - 2023
                 </h2>
                 {trendData.length > 0 && (
                   <div className="h-[620px] w-full">

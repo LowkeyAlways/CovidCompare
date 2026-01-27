@@ -26,24 +26,41 @@ export const TrendChart = ({ series, selectedMetric }: TrendChartProps) => {
   const firstSeries = series[0];
   const labels = firstSeries.data.map((d) => d.date);
 
-  const aggregateToWeeks = (values: number[], dates: string[], sumMode: boolean) => {
-    const weeklyValues: number[] = [];
-    const weeklyLabels: string[] = [];
+  const aggregateToMonths = (values: number[], dates: string[], sumMode: boolean) => {
+    const monthlyValues: number[] = [];
+    const monthlyLabels: string[] = [];
+    let currentMonth: string | null = null;
+    let monthValues: number[] = [];
+    let monthStart: string | null = null;
 
-    for (let i = 0; i < values.length; i += 7) {
-      const slice = values.slice(i, i + 7);
-      const start = dates[i];
-      const end = dates[Math.min(i + 6, dates.length - 1)];
-      const label = `${start} → ${end}`;
-      const value = sumMode
-        ? slice.reduce((acc, v) => acc + v, 0)
-        : slice[slice.length - 1];
+    for (let i = 0; i < values.length; i++) {
+      const date = dates[i];
+      const month = date.substring(0, 7); // YYYY-MM
 
-      weeklyValues.push(value);
-      weeklyLabels.push(label);
+      if (currentMonth && month !== currentMonth) {
+        const value = sumMode
+          ? monthValues.reduce((acc, v) => acc + v, 0)
+          : monthValues[monthValues.length - 1];
+        monthlyValues.push(value);
+        monthlyLabels.push(monthStart || month);
+        monthValues = [];
+        monthStart = null;
+      }
+
+      if (!monthStart) monthStart = month;
+      currentMonth = month;
+      monthValues.push(values[i]);
     }
 
-    return { weeklyValues, weeklyLabels };
+    if (monthValues.length > 0) {
+      const value = sumMode
+        ? monthValues.reduce((acc, v) => acc + v, 0)
+        : monthValues[monthValues.length - 1];
+      monthlyValues.push(value);
+      monthlyLabels.push(currentMonth || monthStart || '');
+    }
+
+    return { weeklyValues: monthlyValues, weeklyLabels: monthlyLabels };
   };
 
   const calculateDailyValues = (values: number[]): number[] => {
@@ -65,7 +82,7 @@ export const TrendChart = ({ series, selectedMetric }: TrendChartProps) => {
   const datasets = series.map((country, idx) => {
     const values = getMetricValues(country.data, selectedMetric);
     const displayValues = mode === 'daily' ? calculateDailyValues(values) : values;
-    const { weeklyValues, weeklyLabels: labelsForSeries } = aggregateToWeeks(
+    const { weeklyValues, weeklyLabels: labelsForSeries } = aggregateToMonths(
       displayValues,
       labels,
       mode === 'daily'
@@ -123,9 +140,9 @@ export const TrendChart = ({ series, selectedMetric }: TrendChartProps) => {
       ...baseLineOptions.scales,
       y: {
         ...baseLineOptions.scales?.y,
-        beginAtZero: false,
+        beginAtZero: minVal <= 0,
         suggestedMin: Math.max(0, minVal - padding),
-        suggestedMax: maxVal + padding,
+        suggestedMax: maxVal + (maxVal * 0.15),
       },
     },
   } as const;
