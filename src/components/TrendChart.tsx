@@ -18,7 +18,7 @@ export const TrendChart = ({ series, selectedMetric }: TrendChartProps) => {
     return <div className="text-center text-gray-500">Pas de données disponibles</div>;
   }
 
-  const isCrowded = series.length >= 6; // Simplify visuals when many countries are shown
+  const isCrowded = series.length >= 6; 
   const chartHeightClass = isCrowded
     ? 'h-[520px] md:h-[620px]'
     : 'h-[420px] md:h-[520px]';
